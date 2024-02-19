@@ -88,7 +88,7 @@ if __name__=='__main__':
         best_params = estimator_CV.best_params_
         print(best_params)
     else:
-        best_params = {'n_iter': 1500, 'lr': 0.001, 'l2pen': 0.001, 'hidden_dim': 100}
+        best_params = {'n_iter': 1500, 'lr': 0.01, 'l2pen': 0.001, 'hidden_dim': 100}
         # The random CV may not always select these parameters, as it depends on rng and whether or not the completely imputed dataset is used.
         # However, this setting will achieve very similar loss and be much faster for training
 
@@ -113,9 +113,9 @@ if __name__=='__main__':
     sns.histplot(props,common_bins=False,binwidth=0.0125,element='step',**{'alpha':0.3,'linewidth':1.4})
     plt.xlabel('Propensity score estimate')
     if use_imputed:
-        plt.savefig('../plots/propensities_imputed.pdf',bbox_inches='tight')
+        plt.savefig('../paperplots/propensities_imputed.pdf',bbox_inches='tight')
     else:
-        plt.savefig('../plots/propensities_removed.pdf',bbox_inches='tight')
+        plt.savefig('../paperplots/propensities_removed.pdf',bbox_inches='tight')
 
 
     ### Print scores for various regressions
@@ -160,7 +160,7 @@ if __name__=='__main__':
     ATE_aipw, ATE_pru = ([] for _ in range(2))
     ATE_sir, ATE_siaipw, ATE_sioapw, ATE_siobpw, = ([] for _ in range(4))
     ATE_sir_cf, ATE_siw_cf, ATE_siz_cf = ([] for _ in range(3))
-    reps = 100
+    reps = 1000
 
     for ii in tqdm(range(reps)):
         T_,W_,Y_ = resample(T,W,Y,n_samples=len(T),random_state=ii)
@@ -195,25 +195,20 @@ if __name__=='__main__':
     dfm['chi1'] = dfm['intmeans'].apply(lambda x: x[1])
     dfm['ATE'] = dfm['intmeans'].apply(lambda x: x[1]-x[0])
 
-    # dfm.to_pickle('results/bootstrap_estimates.pkl')
+    if use_imputed:
+        dfm.to_pickle('results/bootstrap_estimates_imputed.pkl')
+    else:
+        dfm.to_pickle('results/bootstrap_estimates_removed.pkl')
 
-    df_grp = pd.DataFrame(dfm.groupby('estimator')['ATE'].var().rename('BS var')*len(T))
+    df_grp = pd.DataFrame(dfm.groupby('estimator')['ATE'].var().rename('BS var'))
+    df_grp['BS se'] = np.sqrt(df_grp['BS var'])
     df_grp['BS lower'] = dfm.groupby('estimator')['ATE'].quantile(0.025)
     df_grp['BS upper'] = dfm.groupby('estimator')['ATE'].quantile(0.975)
 
-    rename = {
-    'AIPW':'AIPW (Logistic)', 
-    'DOPE-BCL':'DOPE-BCL (Logistic)',
-    'IPW':'IPW (Logistic)',
-    'Regr':'Regr. (Logistic)',
-    'SI_AIPW':'AIPW (NN)',
-    'SI_DOPE-BCL':'DOPE-BCL (NN)',
-    'SI_DOPE-IDX':'DOPE-IDX (NN)',
-    'SI_R':'Regr. (NN)',
-    'Unadjusted':'Naive contrast'
-    }
-    ATEs_pd = pd.Series(ATEs,index=rename.values())
-    Vars_pd = pd.Series(Vars,index=rename.values())
+    est_names = ['Naive contrast', 'IPW (Logistic)', 'Regr. (Logistic)',
+            'AIPW (Logistic)', 'DOPE-BCL (Logistic)', 'Regr. (NN)',
+            'AIPW (NN)', 'DOPE-IDX (NN)', 'DOPE-BCL (NN)']
+    ATEs_pd = pd.Series(ATEs,index=est_names)
     df_grp.insert(0,'estimate',ATEs_pd.reindex_like(df_grp))
 
     if use_imputed:
@@ -222,9 +217,9 @@ if __name__=='__main__':
         df_grp.to_pickle('results/nhanes_ate_removed.pkl')
 
     df_grp['BS CI'] =  list(zip(df_grp['BS lower'].round(3),df_grp['BS upper'].round(3)))
-    df_table = df_grp.drop(['BS lower','BS upper'],axis=1)
+    df_table = df_grp.drop(['BS var','BS lower','BS upper'],axis=1)
     
     if use_imputed:
-        df_table.sort_values(by='BS var').round(3).to_latex('results/nhanes_table_imputed')
+        df_table.sort_values(by='BS se').round(3).to_latex('results/nhanes_table_imputed')
     else:
-        df_table.sort_values(by='BS var').round(3).to_latex('results/nhanes_table_removed')
+        df_table.sort_values(by='BS se').round(3).to_latex('results/nhanes_table_removed')

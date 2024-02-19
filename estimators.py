@@ -255,7 +255,7 @@ def IM_est(T,W,Y,classifier='Logistic',regressor='OLS',trim=eps_trim,t=1,joint_r
 
 
 
-def IM_est_cf(T,W,Y,classifier='Logistic',regressor='OLS',trim=eps_trim,t=1,n_folds=4,joint_regression=True):
+def IM_est_cf(T,W,Y,classifier='Logistic',regressor='OLS',trim=eps_trim,t=1,n_folds=3,joint_regression=True):
     (im_ipw, im_reg, im_aipw, im_obpw) = ([] for _ in range(4))
     (var_ipw, var_reg, var_aipw, var_obpw) = ([] for _ in range(4))
 
@@ -331,7 +331,7 @@ def SI_IM(T,W,Y,clf='Logistic',hidden_dim=100,lr=1e-3,n_iter=1200,trim=eps_trim,
 
 
 
-def SI_IM_cf(T,W,Y,clf='Logistic',hidden_dim=100,lr=1e-3,n_iter=1200,trim=eps_trim,t=1,n_folds=4,initial_idx=None,joint_regression=True):
+def SI_IM_cf(T,W,Y,clf='Logistic',hidden_dim=100,lr=1e-3,n_iter=1200,trim=eps_trim,t=1,n_folds=3,initial_idx=None,joint_regression=True):
     (im_reg, im_aipw,im_oapw, im_obpw) = ([] for _ in range(4))
     (var_reg, var_aipw,var_oapw, var_obpw) = ([] for _ in range(4))
 
