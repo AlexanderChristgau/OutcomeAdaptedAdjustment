@@ -1,0 +1,16 @@
+\begin{tabular}{lrrl}
+\toprule
+{} &  estimate &  BS se &            BS CI \\
+estimator           &           &        &                  \\
+\midrule
+Regr. (NN)          &     0.020 &  0.008 &   (0.002, 0.035) \\
+Regr. (Logistic)    &     0.027 &  0.009 &   (0.012, 0.048) \\
+DOPE-BCL (Logistic) &     0.024 &  0.010 &    (0.004, 0.04) \\
+Naive contrast      &     0.388 &  0.010 &   (0.369, 0.407) \\
+DOPE-BCL (NN)       &     0.018 &  0.010 &  (-0.003, 0.036) \\
+DOPE-IDX (NN)       &     0.023 &  0.012 &  (-0.001, 0.047) \\
+AIPW (NN)           &     0.017 &  0.016 &  (-0.017, 0.046) \\
+AIPW (Logistic)     &     0.022 &  0.016 &  (-0.012, 0.051) \\
+IPW (Logistic)      &    -0.047 &  0.027 &  (-0.119, -0.01) \\
+\bottomrule
+\end{tabular}
